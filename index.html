@@ -148,6 +148,27 @@
             background-color: #38bdf8;
             color: #010409;
         }
+        
+        /* Estilos para o Player de Sons Ambiente */
+        .sound-btn {
+            padding: 8px 16px;
+            border: 1px solid #67e8f9; /* ciano-300 */
+            color: #67e8f9; /* ciano-300 */
+            background-color: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sound-btn:hover {
+            background-color: rgba(103, 232, 249, 0.2);
+        }
+
+        .sound-btn.active {
+            background-color: #67e8f9; /* ciano-300 */
+            color: #020c1b; /* cor de fundo escura */
+            font-weight: bold;
+        }
     </style>
 </head>
 <body class="text-gray-300">
@@ -162,7 +183,6 @@
             <button id="nav-stats" class="nav-link font-mono py-2 px-4 md:px-6 rounded-lg transition-colors duration-300 text-sm md:text-base">Estatísticas</button>
         </nav>
 
-        <!-- Página de Tarefas -->
         <div id="tasks-page">
             <header class="text-center mb-10">
                 <img src="Cópia de K.png" alt="Logotipo Doca das Missões" class="w-24 h-24 mx-auto mb-4" onerror="this.style.display='none'">
@@ -199,7 +219,6 @@
             </main>
         </div>
 
-        <!-- Página Pomodoro -->
         <div id="pomodoro-page" class="hidden">
              <header class="text-center mb-6">
                 <h1 class="text-4xl md:text-5xl font-bold tracking-wider text-white font-mono" style="text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);">
@@ -232,6 +251,17 @@
                     <button id="mode-short-break" class="nav-link font-mono py-2 px-6 rounded-lg transition-all">Pausa Curta</button>
                     <button id="mode-long-break" class="nav-link font-mono py-2 px-6 rounded-lg transition-all">Pausa Longa</button>
                 </div>
+
+                <div id="ambient-sounds-player" class="mt-8 text-center">
+                    <h3 class="text-lg text-cyan-200 mb-4">Sons de Foco</h3>
+                    <div class="flex justify-center gap-4 mb-4">
+                        <button data-sound="mar" class="sound-btn">Mar</button>
+                    </div>
+                    <div class="flex justify-center items-center gap-2">
+                        <span class="text-cyan-400">Volume:</span>
+                        <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5" class="w-32">
+                    </div>
+                </div>
                 <div class="flex gap-6 mt-8">
                     <button id="pomodoro-start-pause" class="bg-cyan-500/80 hover:bg-cyan-500 text-white font-bold py-3 px-10 rounded-lg text-2xl transition-all duration-300 shadow-lg hover:shadow-cyan-400/50">
                         Iniciar
@@ -243,7 +273,6 @@
             </main>
         </div>
 
-        <!-- Página de Estatísticas -->
         <div id="stats-page" class="hidden">
             <header class="text-center mb-10">
                 <h1 class="text-4xl md:text-5xl font-bold tracking-wider text-white font-mono" style="text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);">
@@ -253,21 +282,20 @@
             </header>
             <main>
                  <div class="flex justify-center mb-8">
-                       <div class="bg-black/20 backdrop-blur-sm p-4 rounded-full shadow-lg border border-cyan-500/20 w-80 h-80 flex items-center justify-center relative">
-                             <svg id="stats-timeline-svg" class="absolute inset-0 w-full h-full" viewBox="0 0 320 320">
-                                 <g id="timeline-anchor" fill="rgba(56, 189, 248, 0.2)">
-                                     <path d="M159.5 8.5 a3.5 3.5 0 1 1 1 0 V 22 H 159 Z"></path>
-                                     <circle cx="160" cy="26" r="4"></circle>
-                                 </g>
-                                 <g id="timeline-ring" transform="rotate(-90 160 160)"></g>
-                             </svg>
-                             <div class="text-center">
-                                 <p class="font-mono text-cyan-200 text-lg">Linha do Tempo</p>
-                                 <p class="text-xs text-cyan-300/60">(Sessão Atual)</p>
-                             </div>
-                           </div>
+                      <div class="bg-black/20 backdrop-blur-sm p-4 rounded-full shadow-lg border border-cyan-500/20 w-80 h-80 flex items-center justify-center relative">
+                            <svg id="stats-timeline-svg" class="absolute inset-0 w-full h-full" viewBox="0 0 320 320">
+                                <g id="timeline-anchor" fill="rgba(56, 189, 248, 0.2)">
+                                    <path d="M159.5 8.5 a3.5 3.5 0 1 1 1 0 V 22 H 159 Z"></path>
+                                    <circle cx="160" cy="26" r="4"></circle>
+                                </g>
+                                <g id="timeline-ring" transform="rotate(-90 160 160)"></g>
+                            </svg>
+                            <div class="text-center">
+                                <p class="font-mono text-cyan-200 text-lg">Linha do Tempo</p>
+                                <p class="text-xs text-cyan-300/60">(Sessão Atual)</p>
+                            </div>
+                        </div>
                  </div>
-                <!-- Grupo 1: Visão Geral -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
                     <div class="bg-black/20 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-cyan-500/20 text-center">
                         <h2 id="total-time-title" class="text-xl font-mono text-cyan-200 mb-2 transition-colors">Tempo Total</h2>
@@ -282,7 +310,6 @@
                          <p id="end-time-value" class="text-2xl font-bold text-white">-</p>
                     </div>
                 </div>
-                <!-- Grupo 2: Análise de Foco -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
                     <div class="bg-black/20 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-cyan-500/20 text-center">
                         <h2 id="focus-time-title" class="text-xl font-mono text-cyan-200 mb-2 transition-colors">Tempo Focado</h2>
@@ -297,7 +324,6 @@
                         <p id="cycles-value" class="text-4xl font-bold text-white">0</p>
                     </div>
                 </div>
-                <!-- Grupo 3: Análise de Descanso -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
                     <div class="bg-black/20 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-cyan-500/20 text-center">
                         <h2 id="short-breaks-title" class="text-xl font-mono text-cyan-200 mb-2 transition-colors">Pausas Curtas</h2>
@@ -339,7 +365,6 @@
         </div>
     </div>
 
-    <!-- Modal de Configurações -->
     <div id="settings-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay hidden">
         <div class="bg-[#020c1b] p-8 rounded-2xl shadow-2xl border border-cyan-500/30 w-full max-w-md">
             <h2 class="text-2xl font-mono text-cyan-200 mb-6 text-center">Configurações</h2>
@@ -383,7 +408,6 @@
         </div>
     </div>
     
-    <!-- Modal de Confirmação de Reset -->
     <div id="reset-confirm-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay hidden">
         <div class="bg-[#020c1b] p-8 rounded-2xl shadow-2xl border border-yellow-500/30 w-full max-w-md text-center">
             <h2 class="text-2xl font-mono text-yellow-200 mb-4">Confirmar Ação</h2>
@@ -397,7 +421,6 @@
         </div>
     </div>
     
-    <!-- Modal de Informação Genérica -->
     <div id="info-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay hidden">
         <div id="info-modal-content" class="bg-[#020c1b] p-8 rounded-2xl shadow-2xl border w-full max-w-md text-center">
             <h2 id="info-modal-title" class="text-2xl font-mono mb-4"></h2>
@@ -411,6 +434,52 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // --- LÓGICA DO PLAYER DE SOM AMBIENTE ---
+            const soundButtons = document.querySelectorAll('.sound-btn');
+            const volumeSlider = document.getElementById('volume-slider');
+
+            // Mapeia o nome do botão para o seu arquivo de áudio
+            const sounds = {
+                mar: new Audio('sons/mar.mp3')
+            };
+
+            let currentSound = null;
+
+            // Faz o som tocar em loop
+            sounds.mar.loop = true;
+
+            soundButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const soundKey = button.dataset.sound;
+                    const selectedSound = sounds[soundKey];
+
+                    // Se o som clicado já estiver tocando, pare-o.
+                    if (currentSound === selectedSound && !currentSound.paused) {
+                        currentSound.pause();
+                        currentSound = null;
+                        button.classList.remove('active');
+                    } else { // Se nenhum som estiver tocando, ou se for outro som
+                        if (currentSound) {
+                            currentSound.pause();
+                        }
+                        // Desativa visualmente todos os outros botões (útil quando tiver mais de um)
+                        soundButtons.forEach(btn => btn.classList.remove('active'));
+                        
+                        currentSound = selectedSound;
+                        currentSound.volume = volumeSlider.value; // Ajusta o volume inicial
+                        currentSound.play();
+                        button.classList.add('active'); // Ativa visualmente o botão clicado
+                    }
+                });
+            });
+
+            volumeSlider.addEventListener('input', () => {
+                if (currentSound) {
+                    currentSound.volume = volumeSlider.value;
+                }
+            });
+            // --- FIM DA LÓGICA DO PLAYER ---
+            
             // --- CORREÇÃO APLICADA ---
             // A linha abaixo foi movida do meio do código para o topo para garantir que 'tasks' exista
             // antes que qualquer outra função precise usá-la.
@@ -619,9 +688,6 @@
             const pendingTasksList = document.getElementById('pending-tasks');
             const completedTasksList = document.getElementById('completed-tasks');
             
-            // A LINHA ORIGINAL DAQUI FOI MOVIDA PARA O TOPO
-            // let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-
             const saveTasks = () => localStorage.setItem('tasks', JSON.stringify(tasks));
 
             const renderTasks = () => {
@@ -709,9 +775,12 @@
                     const li = button.closest('li');
                     if (!li) return;
                     const id = parseInt(li.dataset.id);
-                    if (button.classList.contains('activate-btn')) button.addEventListener('click', () => activateTask(id));
-                    if (button.classList.contains('complete-btn')) button.addEventListener('click', () => completeTask(id));
-                    if (button.classList.contains('delete-btn')) button.addEventListener('click', () => deleteTask(id));
+                    // Adiciona o listener apenas uma vez
+                    const newButton = button.cloneNode(true);
+                    button.parentNode.replaceChild(newButton, button);
+                    if (newButton.classList.contains('activate-btn')) newButton.addEventListener('click', () => activateTask(id));
+                    if (newButton.classList.contains('complete-btn')) newButton.addEventListener('click', () => completeTask(id));
+                    if (newButton.classList.contains('delete-btn')) newButton.addEventListener('click', () => deleteTask(id));
                 });
             };
 
@@ -925,28 +994,22 @@
                 pomodoroModeButtons[modeKey].classList.add('next-stage-suggestion');
             };
             
+            // --- CÓDIGO DE ÁUDIO NOVO (com sons reais) ---
+
+            // Esta função tocará o som quando um FOCO terminar
             const playSonarSound = () => {
                 if (!soundEnabled) return;
-                const synth = new Tone.Synth({
-                    oscillator: { type: 'sine' },
-                    envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 1 },
-                    volume: -10
-                }).toDestination();
-                synth.triggerAttackRelease("C4", "8n");
+                // Crie o objeto de áudio com o caminho para o SEU arquivo
+                const somFimFoco = new Audio('sons/som-foco-terminou.mp3'); 
+                somFimFoco.play();
             };
 
+            // Esta função tocará o som quando uma PAUSA terminar
             const playWaterDropSound = () => {
                 if (!soundEnabled) return;
-                const synth = new Tone.MembraneSynth({
-                    pitchDecay: 0.05,
-                    octaves: 10,
-                    oscillator: { type: 'sine' },
-                    envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 1.4, attackCurve: 'exponential' },
-                    volume: -6
-                }).toDestination();
-                const reverb = new Tone.Reverb({ decay: 1.5, wet: 0.4 }).toDestination();
-                synth.connect(reverb);
-                synth.triggerAttackRelease("C2", "8n");
+                // Crie o objeto de áudio com o caminho para o SEU arquivo
+                const somFimPausa = new Audio('sons/som-pausa-terminou.mp3');
+                somFimPausa.play();
             };
             
             const drawTimeline = () => {
