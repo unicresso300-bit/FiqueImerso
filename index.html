@@ -252,16 +252,22 @@
                     <button id="mode-long-break" class="nav-link font-mono py-2 px-6 rounded-lg transition-all">Pausa Longa</button>
                 </div>
 
-                <div id="ambient-sounds-player" class="mt-8 text-center">
-                    <h3 class="text-lg text-cyan-200 mb-4">Sons de Foco</h3>
-                    <div class="flex justify-center gap-4 mb-4">
-                        <button data-sound="mar" class="sound-btn">Mar</button>
-                    </div>
-                    <div class="flex justify-center items-center gap-2">
-                        <span class="text-cyan-400">Volume:</span>
-                        <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5" class="w-32">
-                    </div>
-                </div>
+<div id="ambient-sounds-player" class="mt-8 text-center">
+    <h3 class="text-lg text-cyan-200 mb-4">Sons de Foco</h3>
+    <div class="flex justify-center flex-wrap gap-4 mb-4">
+        <button data-sound="chuva" class="sound-btn">Chuva</button>
+        <button data-sound="floresta" class="sound-btn">Floresta</button>
+        <button data-sound="mar" class="sound-btn">Mar</button>
+        <button data-sound="rio" class="sound-btn">Rio</button>
+        <button data-sound="vento" class="sound-btn">Vento</button>
+        <button data-sound="fogueira" class="sound-btn">Fogueira</button>
+        <button data-sound="cafeteria" class="sound-btn">Cafeteria</button>
+    </div>
+    <div class="flex justify-center items-center gap-2 mt-4">
+        <span class="text-cyan-400">Volume:</span>
+        <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5" class="w-32">
+    </div>
+</div>
                 <div class="flex gap-6 mt-8">
                     <button id="pomodoro-start-pause" class="bg-cyan-500/80 hover:bg-cyan-500 text-white font-bold py-3 px-10 rounded-lg text-2xl transition-all duration-300 shadow-lg hover:shadow-cyan-400/50">
                         Iniciar
@@ -434,51 +440,65 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- LÓGICA DO PLAYER DE SOM AMBIENTE ---
-            const soundButtons = document.querySelectorAll('.sound-btn');
-            const volumeSlider = document.getElementById('volume-slider');
+            // --- INÍCIO DA LÓGICA DO PLAYER DE SONS AMBIENTE (VERSÃO CORRIGIDA) ---
+const soundButtons = document.querySelectorAll('.sound-btn');
+const volumeSlider = document.getElementById('volume-slider');
 
-            // Mapeia o nome do botão para o seu arquivo de áudio
-            const sounds = {
-                mar: new Audio('sons/mar.mp3')
-            };
+const sounds = {
+    chuva: new Audio('sons/chuva.mp3'),
+    floresta: new Audio('sons/floresta.mp3'),
+    mar: new Audio('sons/mar.mp3'),
+    rio: new Audio('sons/rio.mp3'),
+    vento: new Audio('sons/vento.mp3'),
+    fogueira: new Audio('sons/fogueira.mp3'),
+    cafeteria: new Audio('sons/cafeteria.mp3')
+};
 
-            let currentSound = null;
+let currentlyPlaying = null;
 
-            // Faz o som tocar em loop
-            sounds.mar.loop = true;
+// Configura todos os sons para tocarem em loop
+Object.values(sounds).forEach(sound => {
+    sound.loop = true;
+});
 
-            soundButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const soundKey = button.dataset.sound;
-                    const selectedSound = sounds[soundKey];
+soundButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        const soundKey = button.dataset.sound;
+        const selectedSound = sounds[soundKey];
 
-                    // Se o som clicado já estiver tocando, pare-o.
-                    if (currentSound === selectedSound && !currentSound.paused) {
-                        currentSound.pause();
-                        currentSound = null;
-                        button.classList.remove('active');
-                    } else { // Se nenhum som estiver tocando, ou se for outro som
-                        if (currentSound) {
-                            currentSound.pause();
-                        }
-                        // Desativa visualmente todos os outros botões (útil quando tiver mais de um)
-                        soundButtons.forEach(btn => btn.classList.remove('active'));
-                        
-                        currentSound = selectedSound;
-                        currentSound.volume = volumeSlider.value; // Ajusta o volume inicial
-                        currentSound.play();
-                        button.classList.add('active'); // Ativa visualmente o botão clicado
-                    }
-                });
-            });
+        // Remove o status 'active' de todos os botões
+        const deactivateAllButtons = () => {
+            soundButtons.forEach(btn => btn.classList.remove('active'));
+        };
 
-            volumeSlider.addEventListener('input', () => {
-                if (currentSound) {
-                    currentSound.volume = volumeSlider.value;
-                }
-            });
-            // --- FIM DA LÓGICA DO PLAYER ---
+        // Se o som clicado já estiver tocando, ele para.
+        if (currentlyPlaying === selectedSound) {
+            selectedSound.pause();
+            currentlyPlaying = null;
+            deactivateAllButtons();
+        } else {
+            // Se outro som estiver tocando, ele para o som antigo primeiro.
+            if (currentlyPlaying) {
+                currentlyPlaying.pause();
+            }
+            
+            deactivateAllButtons(); // Garante que nenhum botão esteja ativo
+            
+            // Toca o novo som
+            selectedSound.volume = volumeSlider.value;
+            selectedSound.play();
+            button.classList.add('active'); // Ativa o botão correto
+            currentlyPlaying = selectedSound;
+        }
+    });
+});
+
+volumeSlider.addEventListener('input', () => {
+    if (currentlyPlaying) {
+        currentlyPlaying.volume = volumeSlider.value;
+    }
+});
+// --- FIM DA LÓGICA DO PLAYER ---
             
             // --- CORREÇÃO APLICADA ---
             // A linha abaixo foi movida do meio do código para o topo para garantir que 'tasks' exista
