@@ -1122,11 +1122,11 @@
                     path.setAttribute("stroke", color);
 
                     path.addEventListener('mousemove', (e) => {
-                        timelineTooltip.style.display = 'block';
-                        timelineTooltip.style.left = `${e.pageX + 15}px`;
-                        timelineTooltip.style.top = `${e.pageY + 15}px`;
-                        timelineTooltip.innerHTML = `<strong>${typeNames[segment.type]}</strong><br>${Math.round(segment.duration / 60)} min`;
-                    });
+    timelineTooltip.style.display = 'block';
+    timelineTooltip.style.left = `${e.clientX + 15}px`; // <-- CORRIGIDO
+    timelineTooltip.style.top = `${e.clientY + 15}px`;  // <-- CORRIGIDO
+    timelineTooltip.innerHTML = `<strong>${typeNames[segment.type]}</strong><br>${Math.round(segment.duration / 60)} min`;
+});
                     path.addEventListener('mouseout', () => {
                         timelineTooltip.style.display = 'none';
                     });
