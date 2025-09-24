@@ -1088,13 +1088,7 @@
             
             // --- CÓDIGO DE ÁUDIO NOVO (com sons reais) ---
 
-            // Esta função tocará o som quando um FOCO terminar
-            const playSonarSound = () => {
-                if (!soundEnabled) return;
-                // Crie o objeto de áudio com o caminho para o SEU arquivo
-                const somFimFoco = new Audio('sons/som-foco-terminou.mp3'); 
-                somFimFoco.play();
-            };
+            
 
             // Esta função tocará o som quando uma PAUSA terminar
             const playWaterDropSound = () => {
@@ -1195,20 +1189,29 @@ function hideAlarmPopup() {
 }
 
 // ## FIM DAS NOVAS FUNÇÕES DE CONTROLE ##
-// ## INÍCIO DO LISTENER DO BOTÃO DO POPUP ##
+// ## INÍCIO DO LISTENER DO BOTÃO DO POPUP (VERSÃO CORRIGIDA) ##
 popupButton.addEventListener('click', () => {
-    // A primeira ação é sempre parar o alarme e esconder o popup
-    stopAlarm();
-    hideAlarmPopup();
+    // A primeira ação é sempre parar o alarme e esconder o popup
+    stopAlarm();
+    hideAlarmPopup();
 
-    // Agora, verificamos como a transição deve se comportar
-    if (autoTransition) {
-        // Se for automática, inicia o próximo timer imediatamente
-        startTimer();
+    // ==========================================================
+    // ## INÍCIO DA CORREÇÃO ##
+    // Se um som ambiente estava ativo antes, retome-o.
+    if (currentlyPlaying) {
+        currentlyPlaying.play();
     }
-    // Se a transição for manual, nada mais acontece. O app fica esperando o usuário.
+    // ## FIM DA CORREÇÃO ##
+    // ==========================================================
+
+    // Agora, verificamos como a transição deve se comportar
+    if (autoTransition) {
+        // Se for automática, inicia o próximo timer imediatamente
+        startTimer();
+    }
+    // Se a transição for manual, nada mais acontece. O app fica esperando o usuário.
 });
-// ## FIM DO LISTENER DO BOTÃO DO POPUP ##
+// ## FIM DO LISTENER DO BOTÃO DO POPUP (VERSÃO CORRIGIDA) ##
             const advanceToNextStage = () => {
     // Pausa o timer e o som ambiente
     isRunning = false;
@@ -1264,9 +1267,7 @@ popupButton.addEventListener('click', () => {
     highlightSuggestion(nextMode);
 
     // Dispara a notificação do navegador (se o usuário deu permissão)
-    if ("Notification" in window && Notification.permission === "granted") {
-    new Notification(title, { body: message, icon: "logo.png" });
-}
+    
 
     // Toca o alarme e exibe o popup
     playAlarm();
@@ -1538,20 +1539,7 @@ popupButton.addEventListener('click', () => {
             createBubbles();
             renderTasks();
             showPage('tasks');
-            try {
-    const requestNotificationBtn = document.createElement('button');
-    requestNotificationBtn.innerHTML = `Ativar Notificações`;
-    requestNotificationBtn.className = "w-full mt-4 text-cyan-400/70 hover:text-cyan-300 hover:bg-cyan-400/10 font-mono py-2 px-4 rounded-lg transition-colors duration-300 text-sm";
-    requestNotificationBtn.onclick = () => {
-        Notification.requestPermission().then(permission => {
-            if (permission === "granted") {
-                new Notification("Fique Imerso", { body: "Notificações ativadas com sucesso!", icon: "Cópia de K.png" });
-            }
-        });
-    };
-    // Adiciona o botão dentro do modal de configurações
-    document.querySelector('#settings-modal .space-y-6').appendChild(requestNotificationBtn);
-} catch(e) { console.log('Não foi possível adicionar o botão de notificação.')}
+            
         });
     </script>
 <div id="alarm-popup" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
