@@ -194,6 +194,15 @@
             padding: 2px 6px;
             border-radius: 4px;
         }
+        .alarm-active {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
     </style>
 </head>
 <body class="text-gray-300">
@@ -487,6 +496,22 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // ## INÍCIO DO BLOCO DE PREPARAÇÃO ##
+    // Sons da Aplicação
+    const somAlarme = new Audio('sons/alarme.mp3');
+    somAlarme.loop = true; // Essencial para o alarme tocar continuamente
+
+    // Variáveis de Estado do Alarme
+    let isAlarmPlaying = false;
+
+    // Elementos do DOM do Popup
+    const alarmPopup = document.getElementById('alarm-popup');
+    const popupContainer = document.getElementById('popup-container');
+    const popupTitle = document.getElementById('popup-title');
+    const popupMessage = document.getElementById('popup-message');
+    const popupButton = document.getElementById('popup-button');
+    // ## FIM DO BLOCO DE PREPARAÇÃO ##
+
             // --- INÍCIO DA LÓGICA DO PLAYER DE SONS AMBIENTE (VERSÃO CORRIGIDA) ---
             const soundButtons = document.querySelectorAll('.sound-btn');
             const volumeSlider = document.getElementById('volume-slider');
@@ -1135,51 +1160,118 @@
                     startAngle = endAngle;
                 });
             };
-            
+            // ## INÍCIO DAS NOVAS FUNÇÕES DE CONTROLE ##
+
+function playAlarm() {
+    if (!soundEnabled) return;
+    isAlarmPlaying = true;
+    somAlarme.play();
+}
+
+function stopAlarm() {
+    isAlarmPlaying = false;
+    somAlarme.pause();
+    somAlarme.currentTime = 0;
+}
+
+function showAlarmPopup(title, message, buttonText) {
+    popupTitle.textContent = title;
+    popupMessage.textContent = message;
+    popupButton.textContent = buttonText;
+
+    alarmPopup.classList.remove('hidden');
+    popupButton.classList.add('alarm-active');
+    setTimeout(() => {
+        popupContainer.classList.remove('scale-95', 'opacity-0');
+    }, 50);
+}
+
+function hideAlarmPopup() {
+    popupContainer.classList.add('scale-95', 'opacity-0');
+    popupButton.classList.remove('alarm-active');
+    setTimeout(() => {
+        alarmPopup.classList.add('hidden');
+    }, 200);
+}
+
+// ## FIM DAS NOVAS FUNÇÕES DE CONTROLE ##
+// ## INÍCIO DO LISTENER DO BOTÃO DO POPUP ##
+popupButton.addEventListener('click', () => {
+    // A primeira ação é sempre parar o alarme e esconder o popup
+    stopAlarm();
+    hideAlarmPopup();
+
+    // Agora, verificamos como a transição deve se comportar
+    if (autoTransition) {
+        // Se for automática, inicia o próximo timer imediatamente
+        startTimer();
+    }
+    // Se a transição for manual, nada mais acontece. O app fica esperando o usuário.
+});
+// ## FIM DO LISTENER DO BOTÃO DO POPUP ##
             const advanceToNextStage = () => {
-                const activeTask = tasks.find(task => task.active && !task.completed);
-                let nextMode;
+    // Pausa o timer e o som ambiente
+    isRunning = false;
+    clearInterval(timerInterval);
+    if (currentlyPlaying) currentlyPlaying.pause();
 
-                const completedSession = { type: currentMode, duration: timers[currentMode] * 60 };
-                sessionHistory.push(completedSession);
-                cycleHistory.push(completedSession);
-                
-                if (currentMode === 'pomodoro') {
-                    playSonarSound();
-                    totalFocusSessions++;
-                    if(activeTask) activeTask.focusSessions = (activeTask.focusSessions || 0) + 1;
+    // Salva as estatísticas da sessão concluída
+    const activeTask = tasks.find(task => task.active && !task.completed);
+    const completedSession = { type: currentMode, duration: timers[currentMode] * 60 };
+    sessionHistory.push(completedSession);
+    cycleHistory.push(completedSession);
+    if (currentMode === 'pomodoro') {
+        totalFocusSessions++;
+        if(activeTask) activeTask.focusSessions = (activeTask.focusSessions || 0) + 1;
+    } else if(currentMode === 'shortBreak') {
+        totalShortBreaks++;
+        if(activeTask) activeTask.shortBreaks = (activeTask.shortBreaks || 0) + 1;
+    } else if (currentMode === 'longBreak') {
+        totalLongBreaks++;
+        if(activeTask) activeTask.longBreaks = (activeTask.longBreaks || 0) + 1;
+    }
+    saveGlobalStats();
+    saveTasks();
+    drawTimeline();
 
-                    if (cycleHistory.filter(s => s.type === 'pomodoro').length >= 4) {
-                        nextMode = 'longBreak';
-                        totalCyclesCompleted++;
-                        if (activeTask) activeTask.cyclesCompleted = (activeTask.cyclesCompleted || 0) + 1;
-                    } else {
-                        nextMode = 'shortBreak';
-                    }
-                } else {
-                    playWaterDropSound();
-                    if(currentMode === 'shortBreak') {
-                        totalShortBreaks++;
-                        if(activeTask) activeTask.shortBreaks = (activeTask.shortBreaks || 0) + 1;
-                    } else if (currentMode === 'longBreak') {
-                        totalLongBreaks++;
-                        if(activeTask) activeTask.longBreaks = (activeTask.longBreaks || 0) + 1;
-                        cycleHistory = []; 
-                    }
-                    nextMode = 'pomodoro';
-                }
+    // Determina qual será a próxima etapa
+    let nextMode;
+    if (currentMode === 'pomodoro') {
+        if (cycleHistory.filter(s => s.type === 'pomodoro').length >= 4) {
+            nextMode = 'longBreak';
+            totalCyclesCompleted++;
+            if (activeTask) activeTask.cyclesCompleted = (activeTask.cyclesCompleted || 0) + 1;
+            cycleHistory = [];
+        } else {
+            nextMode = 'shortBreak';
+        }
+    } else {
+        nextMode = 'pomodoro';
+    }
 
-                drawTimeline();
-                
-                saveGlobalStats();
-                saveTasks();
-                setMode(nextMode, false);
-                if (autoTransition) {
-                    setTimeout(startTimer, 1000);
-                } else {
-                    highlightSuggestion(nextMode);
-                }
-            };
+    // Prepara os textos para o popup e para a notificação
+    let title, message;
+    if (currentMode === 'pomodoro') {
+        title = "Foco Concluído!";
+        message = "Ótimo trabalho! Hora de uma merecida pausa.";
+    } else {
+        title = "Pausa Finalizada!";
+        message = "Sua pausa acabou. Prepare-se para a próxima sessão.";
+    }
+
+    // Prepara a interface para a próxima etapa (mas não a inicia)
+    setMode(nextMode, false);
+    highlightSuggestion(nextMode);
+
+    // Dispara a notificação do navegador (se o usuário deu permissão)
+    if ("Notification" in window && Notification.permission === "granted") {
+        new Notification(title, { body: message, icon: "Cópia de K.png" });
+    }
+
+    // Toca o alarme e exibe o popup
+    playAlarm();
+    showAlarmPopup(title, message, "Desligar Alarme");
+};
 
             const setMode = (mode, resetCycle = false) => {
                 currentMode = mode;
@@ -1446,7 +1538,33 @@
             createBubbles();
             renderTasks();
             showPage('tasks');
+            try {
+    const requestNotificationBtn = document.createElement('button');
+    requestNotificationBtn.innerHTML = `Ativar Notificações`;
+    requestNotificationBtn.className = "w-full mt-4 text-cyan-400/70 hover:text-cyan-300 hover:bg-cyan-400/10 font-mono py-2 px-4 rounded-lg transition-colors duration-300 text-sm";
+    requestNotificationBtn.onclick = () => {
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+                new Notification("Fique Imerso", { body: "Notificações ativadas com sucesso!", icon: "Cópia de K.png" });
+            }
+        });
+    };
+    // Adiciona o botão dentro do modal de configurações
+    document.querySelector('#settings-modal .space-y-6').appendChild(requestNotificationBtn);
+} catch(e) { console.log('Não foi possível adicionar o botão de notificação.')}
         });
     </script>
+<div id="alarm-popup" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
+        <div id="popup-container" class="bg-[#020c1b] p-8 rounded-2xl shadow-2xl border border-cyan-500/30 w-full max-w-md text-center transform transition-all scale-95 opacity-0">
+            <img src="Cópia de K.png" alt="Logotipo Fique Imerso" class="w-20 h-20 mx-auto mb-4">
+            <h2 id="popup-title" class="text-3xl font-bold font-mono text-cyan-200 mb-4"></h2>
+            <p id="popup-message" class="text-gray-300 mb-8"></p>
+            <button id="popup-button" class="bg-cyan-500/80 hover:bg-cyan-500 text-white font-bold py-3 px-10 rounded-lg text-lg transition-colors duration-300 w-full">
+                Desligar Alarme
+            </button>
+        </div>
+    </div>
+    </body>
+</html>
 </body>
 </html>
