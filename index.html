@@ -219,7 +219,7 @@
 
         <div id="tasks-page">
             <header class="text-center mb-10">
-                <img src="Cópia de K.png" alt="Logotipo Fique Imerso" class="w-24 h-24 mx-auto mb-4" onerror="this.style.display='none'">
+               <img src="logo.png" alt="Logotipo Fique Imerso" class="w-24 h-24 mx-auto mb-4" onerror="this.style.display='none'">
                 <h1 class="text-4xl md:text-5xl font-bold tracking-wider text-slate-50 font-mono">
     Fique Imerso
 </h1>
@@ -1265,8 +1265,8 @@ popupButton.addEventListener('click', () => {
 
     // Dispara a notificação do navegador (se o usuário deu permissão)
     if ("Notification" in window && Notification.permission === "granted") {
-        new Notification(title, { body: message, icon: "Cópia de K.png" });
-    }
+    new Notification(title, { body: message, icon: "logo.png" });
+}
 
     // Toca o alarme e exibe o popup
     playAlarm();
@@ -1556,7 +1556,7 @@ popupButton.addEventListener('click', () => {
     </script>
 <div id="alarm-popup" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
         <div id="popup-container" class="bg-[#020c1b] p-8 rounded-2xl shadow-2xl border border-cyan-500/30 w-full max-w-md text-center transform transition-all scale-95 opacity-0">
-            <img src="Cópia de K.png" alt="Logotipo Fique Imerso" class="w-20 h-20 mx-auto mb-4">
+          <img src="logo.png" alt="Logotipo Fique Imerso" class="w-20 h-20 mx-auto mb-4">
             <h2 id="popup-title" class="text-3xl font-bold font-mono text-cyan-200 mb-4"></h2>
             <p id="popup-message" class="text-gray-300 mb-8"></p>
             <button id="popup-button" class="bg-cyan-500/80 hover:bg-cyan-500 text-white font-bold py-3 px-10 rounded-lg text-lg transition-colors duration-300 w-full">
